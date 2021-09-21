@@ -1,8 +1,7 @@
 import psycopg2
-import example_psql as creds
+import const as creds
 
-#import sqlite3
-#from pysqlcipher3 import dbapi2 as sqlite3
+import sqlite3
 
 DEBUG=False
 
@@ -24,7 +23,7 @@ class Database:
             try:
                 connection = sqlite3.connect(creds.DATABASE_PATH)
                 return connection
-            except:
+            except Exception as e:
                 print("[ERROR] Failed to connect to database path.")
         if self.currentDB == "POSTGRESQL":
             try:
@@ -68,29 +67,23 @@ class Database:
         except Exception if self.currentDB=="SQLite" else (Exception, psycopg2.Error) as error:
             return Message("ERROR", error)
 
-    def find_info(self, field, value, want="*"):
+    def find_info(self, field=None, value=None, want="*"):
         data = ('Password: ', 'Email: ', 'Username: ', 'url: ', 'App/Site name: ') 
         try:
             connection = self.connect()
             cursor = connection.cursor()
-            postgres_select_query = """ SELECT """ + want+""" FROM accounts WHERE """+ field +" = '"+value+"'"
+            postgres_select_query = """ SELECT """ + want+""" FROM accounts """
+            detials = ("""WHERE """+ field +" = '"+value+"'")if (field != None and value!=None) else ""
+            postgres_select_query += detials
             if self.currentDB == "SQLite":
                 cursor.execute(postgres_select_query)
             elif self.currentDB == "POSTGRESQL":
-                cursor.execute(postgres_select_query, (want, field, value))
+                cursor.execute(postgres_select_query)
             connection.commit()
             result = cursor.fetchall()
             if result!= []:
                 return Message("RESULT", result)
-                #print(result)
-                '''for row in result:
-                    for i in range(0, len(row)):
-                        if want=="*":
-                            print(data[i] + row[i])
-                        else:
-                            print(want,": ", row[i])
-                print('')
-                print('-'*30)'''
+                
             else: return Message("RESULT", "No data found.")
         
         except Exception if self.currentDB=="SQLite" else (Exception, psycopg2.Error) as error:
@@ -140,13 +133,19 @@ class Database:
             return info
 
 
-def test():
-    db = Database("POSTGRESQL")
-    print(db)
+def create_db(db):
+    connection = db.connect()
+    cursor = connection.cursor()
+    cursor.execute("CREATE TABLE accounts (password, email, username, url, app_name)")
+    connection.commit()
+
+
+def test(db):
+    db = Database("SQLite")
     r1 = db.store_passwords(password="password", url="url1", username="username", user_email="user_email", app_name="app_name")
     r2 = db.find_info(field="app_name", value="app_name")
     r3 = db.find_password("app_name")
-    r4 = db.find_info(field="url", value="url1")
+    r4 = db.find_info()
     r5 = db.delete_data_with(field="url", value="url1")
     r6 = db.find_info(field="url", value="url1")
     print("r1: ", r1, "\nr2: ", r2, "\nr3: ", r3, "\nr4: ", r4, "\nr5: ", r5, "\nr6: ", r6)
@@ -164,98 +163,6 @@ def shell_for_sqlite():
         print(result)
 
 if __name__=="__main__":
-    test()
-    #shell_for_sqlite()
-
-def connect():
-    try:
-        conn_string = "host="+ creds.PGHOST +" port="+ creds.PGPORT +" dbname="+ creds.PGDATABASE +" user=" + creds.PGUSER \
-        +" password="+ creds.PGPASSWORD
-        connection=psycopg2.connect(conn_string)
-        return connection
-        if DEBUG==True:
-            print("[INFO] Connected to database.")
-    except (Exception, psycopg2.Error) as e:
-        print("[ERROR] Could not connect to database: %s"%e)
-
-
-def store_passwords(password, user_email, username, url, app_name):
-    try:
-        connection = connect()
-        cursor = connection.cursor()
-        postgres_insert_query = f" INSERT INTO accounts (password, email, username, url, app_name) VALUES (?, ?, ?, ?, ?)"
-        record_to_insert = (password, user_email, username, url, app_name)
-        cursor.execute(postgres_insert_query, record_to_insert)
-        connection.commit()
-        return "\nDone \nI will remember it for you\n"
-    except Exception as e:
-        return f"[ERROR] {e}"
-    '''except (Exception, psycopg2.Error) as error:
-        return f"[ERROR] {error}"'''
-
-
-def find_info(field, value, want="*"):
-    data = ('Password: ', 'Email: ', 'Username: ', 'url: ', 'App/Site name: ') 
-    try:
-        connection = connect()
-        cursor = connection.cursor()
-        postgres_select_query = """ SELECT """ + want+""" FROM accounts WHERE """+ field +" = '"+value+"'"
-        #print("-->",postgres_select_query)
-        #cursor.execute(postgres_select_query, (want, field, value))
-        cursor.execute(postgres_select_query)
-        connection.commit()
-        result = cursor.fetchall()
-        if result!= []:
-            print('')
-            print('RESULT')
-            print('')
-            #print(result)
-            for row in result:
-                for i in range(0, len(row)):
-                    if want=="*":
-                        print(data[i] + row[i])
-                    else:
-                        print(want,": ", row[i])
-            print('')
-            print('-'*30)
-        else: print("No data found.")
-    except Exception as e:
-        return f"[ERROR] {e}"
-    '''except (Exception, psycopg2.Error) as error:
-        print("[Error] ", error)'''
-
-
-def find_password(app_name):
-    try:
-        connection = connect()
-        cursor = connection.cursor()
-        postgres_select_query = f""" SELECT password FROM accounts WHERE app_name = '{app_name}'"""
-        #cursor.execute(postgres_select_query, app_name)
-        cursor.execute(postgres_select_query)
-        connection.commit()
-        result = cursor.fetchone()
-        return str(result[0])
-        #print('Password is: ' )
-        #print(result[0])
-    except Exception as e:
-        return f"[ERROR] {e}"
-    '''except (Exception, psycopg2.Error) as error:
-        print("[Error] ", error)'''
-
-def change_password_to(new_password, app_name):
-    try:
-        connection = connect()
-        cursor = connection.cursor()
-        postgres_select_query = """ UPDATE accounts SET password = '"""+ new_password +"""' WHERE app_name = '""" + app_name + "'"
-        cursor.execute(postgres_select_query, app_name)
-        connection.commit()
-    except (Exception, psycopg2.Error) as error:
-        print("[Error] ", error)
-
-#store_passwords(password="B1921117589v", app_name="github", user_email="vigneshbezawada3@gmail.com", url="https://www.github.com/login", username="BezawadaVignesh")
-#find_users(field="email", value="vigneshbezawada3@gmail.com")
-#find_users(field="url", value="https://www.github.com/login", want="username")
-#find_users(field="url", value="Bezawadavignesh")
-#find_password("github")
-#change_password("This is my pass", "github")
-
+    db = Database("SQLite")
+    create_db(db)
+    test(db)
