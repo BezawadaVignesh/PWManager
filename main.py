@@ -5,7 +5,6 @@ from termcolor import cprint
 from rich import print
 
 from password_manager import PWManager
-#from example_psql import SECRET_KEY
 
 import time
 import getpass
@@ -19,8 +18,10 @@ def print_info():
     print("""
     1. Add a password.
     2. Find a existing password of a site.
-    3. Change a existing password of a site.   
-    4. Quit.
+    3. Change a existing password of a site.
+    4. Print all stored info.
+    5. Delete a strored password.
+    6. Quit.
     """)
 
 def shell():
@@ -37,28 +38,37 @@ def menu(pm,db="SQLite"):
     print_info()
     
     while(True):
-        request = input("> ")
-        if request == "1":
-            pm.add_password()
-        elif request == "2":
-            app_name = input("Enter the App/site name: ")
-            pm.password_of(app_name)
+        try:
+            request = input("> ")
+            if request == "1":
+                pm.add_password()
+            elif request == "2":
+                app_name = input("Enter the App/site name: ")
+                pm.password_of(app_name)
+                
+            elif request == "3":
+                pm.change_password()
             
-        elif request == "3":
-            pm.change_password()
-
-        elif request == "4":
-            print("Closing Vigneshmanager1.0 \nScreen will be cleared...")
-            input("\nPress any key to countinue...")
-            os.system('cls' if os.name == 'nt' else 'clear')
-            break
-        elif request == "cls" or request == "clear":
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print_icon()
-        elif request.lower() == "shell":
-            shell()
-        else:
-            print("I don't know that!")
+            elif request == "4":
+                pm.find_info()
+            
+            elif request == "5":
+                pm.delete_data()
+            
+            elif request == "6":
+                print("Closing Vigneshmanager1.0 \nScreen will be cleared...")
+                input("\nPress any key to countinue...")
+                os.system('cls' if os.name == 'nt' else 'clear')
+                break
+            elif request == "cls" or request == "clear":
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print_icon()
+            elif request == "help":
+                print_info()
+            else:
+                print("I don't know that!")
+        except Exception as e:
+            print(e)
 
 
 
@@ -83,10 +93,7 @@ if __name__ == "__main__":
 def loginInChrome(url, username, password):
     driver = webdriver.Chrome(r"chromedriver.exe")
 
-    driver.get(url) # "http://www.github.com/login"
-
-    #my_username ="vigneshbezawada3@gmail.com"
-    #my_password= "B1921117589v"
+    driver.get(url)
 
     username_input_box = driver.find_element_by_name("login")
     password_input_box = driver.find_element_by_name("password")
