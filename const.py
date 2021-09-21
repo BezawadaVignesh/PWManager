@@ -3,7 +3,7 @@ PGDATABASE="vigneshmanager"
 PGUSER="vignesh"
 PGPASSWORD=""
 PGPORT="5432"
-SECRET_KEY="w4Qq3tLgX3vec/aeiXR/ffEXlypDxBpIiqsxoENwlIs="
+SECRET_KEY="o0uQjriPHjwu7tC3/uXyW6MAzWROmor8g004L2Xere8="
 
 USER_LEVEL = ""
 CURRENTDB_TYPE = "SQLite"
