@@ -91,7 +91,6 @@ def get_hexdigest(salt, plaintext):
 def password(plaintext, app_name, length=16):
     raw_hex = make_password(plaintext, app_name)
     ALPHABET = ('abcdefghijklmnopqrstuvwxyz', 'ABCDEFGHIJKLMNOPQRSTYVWXYZ', '0123456789', '(/|!@#$%&)+=')
-    
     pssword = ""
     num = random.randint(0, len(raw_hex)-length//2)
     raw_hex = raw_hex[num: num+length//2]
@@ -104,76 +103,7 @@ def password(plaintext, app_name, length=16):
         pssword += alpha[n]
 
     return pssword
-    
-def run(commands):
-    commands = ["store", "create", "find", "change", "delete"]
 
 
 if __name__ == "__main__":
-    '''
-    try:
-        commands = ["store", "create", "find", "change", "delete"]
-        while True:
-            request = input("> ")
-            if request == "\q":
-                print("Closeing shell..\n")
-                break
-            else:
-                bad = True
-                ucommands = request.split(" ")
-                for command in commands:
-                    for ucommand in ucommands:
-                        if command == ucommand:
-                            bad = False  
-                            run(request)
-                if bad:
-                    print("I don't know that.")
-
-    
-
-    
-
-        #print(decrypt(key="5e79bacad0f958956600511db76cf1af14a17e9f02d79a5b57a481b5fca46350".encode(), source="w4Qq3tLgX3vec/aeiXR/ffEXlypDxBpIiqsxoENwlIs="))
-        #print(decrypt(key="f1af14a17e9f02d79a5b57a481b5fca46350".encode(), source="w4Qq3tLgX3vec/aeiXR/ffEXlypDxBpIiqsxoENwlIs="))
-    except Exception as e:
-        print("this -->",e)'''
-
-class Encryptor():
-
-    def key_create(self):
-        key = Fernet.generate_key()
-        return key
-
-    def key_write(self, key, key_name):
-        with open(key_name, 'wb') as mykey:
-            mykey.write(key)
-
-    def key_load(self, key_name):
-        with open(key_name, 'rb') as mykey:
-            key = mykey.read()
-        return key
-
-
-    def file_encrypt(self, key, original_file, encrypted_file):
-        
-        f = Fernet(key)
-
-        with open(original_file, 'rb') as file:
-            original = file.read()
-
-        encrypted = f.encrypt(original)
-
-        with open (encrypted_file, 'wb') as file:
-            file.write(encrypted)
-
-    def file_decrypt(self, key, encrypted_file, decrypted_file):
-        
-        f = Fernet(key)
-
-        with open(encrypted_file, 'rb') as file:
-            encrypted = file.read()
-
-        decrypted = f.decrypt(encrypted)
-
-        with open(decrypted_file, 'wb') as file:
-            file.write(decrypted)
+    print("This file is a part of the project plese run main.py")
